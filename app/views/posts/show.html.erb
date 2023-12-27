@@ -1,0 +1,11 @@
+<h1><%= @post.title %></h1>
+
+<p><%= @post.body %></p>
+
+<p><%= @post.user.username %></p>
+
+<% if @authorized %>
+    <ul>
+    <li><%= link_to "Edit", edit_post_path(@post) %></li>
+    </ul>
+<% end %>

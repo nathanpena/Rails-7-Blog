@@ -1,0 +1,15 @@
+<h1>Posts</h1>
+
+<ul>
+  <% @posts.each do |post| %>
+      <div>
+        <li>
+         <%= link_to post.title, post %> by <%= post.user.username %>
+        </li>
+      </div>
+  <% end %>
+</ul>
+
+<% if @authenticated %>
+  <%= link_to "New Post", new_post_path %>
+<% end %>
