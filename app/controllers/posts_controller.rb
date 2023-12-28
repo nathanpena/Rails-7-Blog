@@ -1,50 +1,40 @@
 class PostsController < ApplicationController
+    before_action :is_authorized?, only: [:show, :edit, :update]
+    before_action :redirect_unauthorized, only: [:edit, :update]
+    before_action :is_authenticated?, only: [:index, :new]
+    before_action :set_user_id, only: [:new, :create, :edit, :update]
     def index 
         @posts = Post.all
-
-        @authenticated = is_authenticated?
     end
 
     def show
-        @post = Post.find(params[:id])
-        @authorized = is_authorized?(@post)
     end
 
     def new 
         @post = Post.new
-        @user_id = session[:user_id]
-        redirect_to posts_path unless is_authenticated?
+        redirect_to posts_path unless @authenticated
     end
 
     def create 
         @post = Post.new(post_params)
       
         if @post.save
-            flash[:alert] = ""
             redirect_to posts_path
         else 
-            flash[:alert] = "Could not save post."
-            @user_id = session[:user_id]
+            flash.now[:notice] = "Could not save post."
             render :new, status: :unprocessable_entity
         end
     end
 
     def edit
-        @post = Post.find(params[:id])
-        redirect_to posts_path unless is_authorized?(@post)
     end
 
     def update
-        @post = Post.find(params[:id])
-
-        if !is_authorized?(@post)
-            redirect_to posts_path
-        else 
-            if @post.update(post_params)
-                redirect_to @post
-            else
-                render :edit, status: :unprocessable_entity
-            end
+        if @post.update(post_params)
+            redirect_to @post
+        else
+            flash.now[:notice] = "Could not update Post."
+            render :edit, status: :unprocessable_entity
         end
     end
 
@@ -57,11 +47,20 @@ class PostsController < ApplicationController
             User.find_by(id: session[:user_id])
         end
 
-        def is_authorized?(post) 
-            post.user == current_user
+        def is_authorized? 
+            @post = Post.find(params[:id])
+            @authorized = @post.user == current_user             
         end
 
         def is_authenticated?
-            current_user != nil
+            @authenticated = current_user != nil
+        end
+
+        def redirect_unauthorized
+            redirect_to posts_path unless @authorized
+        end
+
+        def set_user_id
+            @user_id = session[:user_id]
         end
 end
