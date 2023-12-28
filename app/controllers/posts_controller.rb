@@ -17,15 +17,14 @@ class PostsController < ApplicationController
     end
 
     def create 
-        #Is there a better way to do this? I looked for an example 
-        #for the rails way to handle saving belongs_to in M, V, and C
-        post = Post.new(post_params)
-        @post = Post.create(title: post.title, body: post.body, user: current_user)
+        @post = Post.new(post_params)
       
         if @post.save
+            flash[:alert] = ""
             redirect_to posts_path
         else 
             flash[:alert] = "Could not save post."
+            @user_id = session[:user_id]
             render :new, status: :unprocessable_entity
         end
     end
@@ -51,7 +50,7 @@ class PostsController < ApplicationController
 
     private 
         def post_params
-            params.require(:post).permit(:title, :body)
+            params.require(:post).permit(:title, :body, :user_id)
         end
 
         def current_user
