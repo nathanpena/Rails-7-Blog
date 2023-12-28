@@ -10,7 +10,7 @@ class RegistrationsController < ApplicationController
         @user = User.create(user_params)
 
         if @user.save 
-            redirect_to new_logins_path
+            redirect_to new_login_path
         else
             flash[:alert] = "Could not save user."
             render :new, status: :unprocessable_entity

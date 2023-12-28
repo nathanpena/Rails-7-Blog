@@ -11,21 +11,21 @@ class PostsController < ApplicationController
     end
 
     def new 
-        if is_authenticated?
-             @post = Post.new
-        else
-            redirect_to posts_path
-        end
+        @post = Post.new
+        @user_id = session[:user_id]
+        redirect_to posts_path unless is_authenticated?
     end
 
     def create 
-        @user = User.find_by(id: session[:user_id])
+        #Is there a better way to do this? I looked for an example 
+        #for the rails way to handle saving belongs_to in M, V, and C
         post = Post.new(post_params)
-        @user.posts.build(title: post.title, body: post.body)
-        
-        if @user.save 
+        @post = Post.create(title: post.title, body: post.body, user: current_user)
+      
+        if @post.save
             redirect_to posts_path
         else 
+            flash[:alert] = "Could not save post."
             render :new, status: :unprocessable_entity
         end
     end
